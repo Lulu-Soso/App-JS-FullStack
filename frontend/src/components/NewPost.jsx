@@ -1,15 +1,28 @@
 import React, {useState} from 'react';
 import axios from "axios";
+import {useDispatch, useSelector} from "react-redux";
+import {createPost, getPosts} from "../feature/post.slice";
 
-const NewPost = ({userId}) => {
+const NewPost = () => {
   const [message, setMessage] = useState("")
+  const userId = useSelector((state) => state.user.userId)
+  const dispatch = useDispatch()
   const handleForm = (e) => {
     e.preventDefault()
 
-    axios.post('http://localhost:5000/post/', {
-      message: message,
-      author: userId
-    }).then(r => "")
+    const data = {
+      message,
+      author: userId,
+      // Créer un ID provisoire en attendant le retour de la BDD
+      _id: Date.now(),
+    }
+
+    axios.post('http://localhost:5000/post/', data)
+        .then(() => {
+          dispatch(createPost(data))
+          // getPost car il faut aller chercher de l'ID crée par MongoDB
+          dispatch(getPosts())
+        })
 
     // Effacer le message après l'envoi
     setMessage("")
